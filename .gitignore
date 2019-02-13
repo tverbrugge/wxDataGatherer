@@ -1,0 +1,5 @@
+/bin/
+.gradle/*
+/config/ncdcSecurity.xml
+.gradle/vcs-1/gc.properties
+.settings/org.eclipse.buildship.core.prefs
