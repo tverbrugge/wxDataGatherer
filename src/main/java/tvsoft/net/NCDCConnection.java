@@ -12,8 +12,9 @@ import java.util.Properties;
 import javax.net.ssl.HttpsURLConnection;
 
 public class NCDCConnection {
-	
-	// See https://stackoverflow.com/questions/24454164/what-will-be-the-equivalent-to-following-curl-command-in-java
+
+	// See
+	// https://stackoverflow.com/questions/24454164/what-will-be-the-equivalent-to-following-curl-command-in-java
 	public static void main(String[] args) {
 
 		String data = "key={authKey}";
@@ -29,7 +30,7 @@ public class NCDCConnection {
 	private static HttpsURLConnection getConnection() {
 		HttpsURLConnection connection;
 		try {
-			connection = (HttpsURLConnection) new URL("http://example.com/").openConnection();
+			connection = (HttpsURLConnection) new URL(getUrlString()).openConnection();
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
@@ -39,24 +40,37 @@ public class NCDCConnection {
 		} catch (ProtocolException e) {
 			throw new RuntimeException(e);
 		}
-//		connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//		connection.setRequestProperty("charset", "UTF-8");
-//		connection.setRequestProperty("Content-Length", String.valueOf(length));
+		// connection.setRequestProperty("Content-Type",
+		// "application/x-www-form-urlencoded");
+		// connection.setRequestProperty("charset", "UTF-8");
+		// connection.setRequestProperty("Content-Length",
+		// String.valueOf(length));
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
 
 		return connection;
 	}
 
+	private static Properties properties;
+
 	private static Properties getConnectionProperties() {
-		Properties props = new Properties();
-		try {
-			props.loadFromXML(Files.newInputStream(Paths.get("./config/ncdcSecurity.xml")));
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
+		if (properties == null) {
+			properties = new Properties();
+			try {
+				properties.loadFromXML(Files.newInputStream(Paths.get("./config/ncdcSecurity.xml")));
+				properties = new Properties(properties);
+				properties.loadFromXML(Files.newInputStream(Paths.get("./config/ncdcConfig.xml")));
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
 		}
-		return props;
+
+		return properties;
+	}
+	
+	private static String getUrlString() {
+		return getConnectionProperties().getProperty("url");
 	}
 
 }
