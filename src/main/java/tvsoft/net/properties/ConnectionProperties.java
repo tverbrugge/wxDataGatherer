@@ -10,8 +10,8 @@ public class ConnectionProperties {
 	private Properties properties;
 
 	public String getUrlString() {
-		return String.format("%sdata?stationid=", getConnectionProperties().getProperty("url"),
-				getConnectionProperties().getProperty("stationId"));
+		return String.format("%1$sdata?stationid=%2$s", getConnectionProperties().getProperty("url"),
+				getStationId());
 	}
 
 	private Properties getConnectionProperties() {
@@ -28,5 +28,10 @@ public class ConnectionProperties {
 		}
 
 		return properties;
+	}
+
+	private String getStationId() {
+//		return getConnectionProperties().getProperty("stationId");
+		return "GHCND:USW00003017";
 	}
 }
