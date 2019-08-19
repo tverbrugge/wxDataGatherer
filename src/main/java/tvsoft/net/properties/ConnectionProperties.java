@@ -10,7 +10,7 @@ public class ConnectionProperties {
 	private Properties properties;
 
 	public String getUrlString() {
-		return String.format("%1$sdata?stationid=%2$s", getConnectionProperties().getProperty("url"),
+		return String.format("%sdata?stationid=%s", getConnectionProperties().getProperty("url"),
 				getStationId());
 	}
 

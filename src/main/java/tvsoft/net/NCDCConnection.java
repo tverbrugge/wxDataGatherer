@@ -13,6 +13,8 @@ import java.util.Properties;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import tvsoft.net.properties.ConnectionProperties;
+
 public class NCDCConnection {
 
 	// See
@@ -25,11 +27,11 @@ public class NCDCConnection {
 		// BufferedReader reader;
 
 		HttpsURLConnection connection = getConnection();
-		try (OutputStream os = connection.getOutputStream()) {
-			os.write(bytes, 0, length);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try (OutputStream os = connection.getOutputStream()) {
+//			os.write(bytes, 0, length);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
 			String line = null;
@@ -46,7 +48,7 @@ public class NCDCConnection {
 	private static HttpsURLConnection getConnection() {
 		HttpsURLConnection connection;
 		try {
-			String urlString = getUrlString();
+			String urlString = getConnectionProperties().getUrlString();
 			System.out.println(urlString);
 			connection = (HttpsURLConnection) new URL(urlString).openConnection();
 		} catch (IOException e) {
@@ -76,34 +78,33 @@ public class NCDCConnection {
 		// connection.setRequestProperty("charset", "UTF-8");
 		// connection.setRequestProperty("Content-Length",
 		// String.valueOf(length));
+		connection.setRequestProperty("token", getRequestToken());
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
 		connection.setReadTimeout(15 * 1000);
 
 	}
 
-	private static Properties properties;
+	private static ConnectionProperties connectionProperties;
 
-	private static Properties getConnectionProperties() {
-		if (properties == null) {
-			properties = new Properties();
-			try {
-				properties.loadFromXML(Files.newInputStream(Paths.get("./config/ncdcSecurity.xml")));
-				properties = new Properties(properties);
-				properties.loadFromXML(Files.newInputStream(Paths.get("./config/ncdcConfig.xml")));
-			} catch (IOException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			}
+	private static ConnectionProperties getConnectionProperties() {
+		if (connectionProperties == null) {
+			connectionProperties = new ConnectionProperties();
 		}
-
-		return properties;
+		return connectionProperties;
 	}
-
-	private static String getUrlString() {
-		return String.format("%sdata?stationid=%s", getConnectionProperties().getProperty("url"), "GHCND:USW00003017"
-		// getConnectionProperties().getProperty("stationId")
-		);
+	
+	private static String getRequestToken()
+	{
+		Properties properties = new Properties();
+		try {
+			properties.loadFromXML(Files.newInputStream(Paths.get("./config/ncdcSecurity.xml")));
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		System.out.println("Using token " + properties.getProperty("token"));
+		return properties.getProperty("token");
 	}
 
 }
