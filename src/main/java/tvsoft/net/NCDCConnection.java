@@ -9,6 +9,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -27,11 +31,11 @@ public class NCDCConnection {
 		// BufferedReader reader;
 
 		HttpsURLConnection connection = getConnection();
-//		try (OutputStream os = connection.getOutputStream()) {
-//			os.write(bytes, 0, length);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
+		// try (OutputStream os = connection.getOutputStream()) {
+		// os.write(bytes, 0, length);
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
 			String line = null;
@@ -48,7 +52,8 @@ public class NCDCConnection {
 	private static HttpsURLConnection getConnection() {
 		HttpsURLConnection connection;
 		try {
-			String urlString = getConnectionProperties().getUrlString();
+			String urlString = getConnectionProperties()
+					.getUrlStringForData(Date.from(Instant.now().minus(7, ChronoUnit.DAYS)), Date.from(Instant.now()));
 			System.out.println(urlString);
 			connection = (HttpsURLConnection) new URL(urlString).openConnection();
 		} catch (IOException e) {
@@ -93,9 +98,8 @@ public class NCDCConnection {
 		}
 		return connectionProperties;
 	}
-	
-	private static String getRequestToken()
-	{
+
+	private static String getRequestToken() {
 		Properties properties = new Properties();
 		try {
 			properties.loadFromXML(Files.newInputStream(Paths.get("./config/ncdcSecurity.xml")));
